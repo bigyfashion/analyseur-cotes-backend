@@ -4,7 +4,12 @@ const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
+const { initSchema } = require("./db/init");
 const apiV1 = require("./routes/api-v1");
+
+// Applique le schema a chaque demarrage (idempotent): necessaire sur un palier gratuit
+// sans acces Shell, ou le fichier SQLite est recree vide a chaque reveil du service.
+initSchema();
 
 const app = express();
 

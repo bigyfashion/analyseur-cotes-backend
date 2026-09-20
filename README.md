@@ -40,6 +40,44 @@ Aucun redéploiement requis. À partir de ce moment, les nouvelles inscriptions
 ne reçoivent plus d'accès gratuit automatique et doivent passer par
 `POST /subscriptions/subscribe` comme prévu dans le flux payant.
 
+## Déploiement sans accès Shell (ex. palier gratuit Render)
+
+Le Shell n'est pas inclus sur le palier gratuit de plusieurs hébergeurs. Ce
+backend est conçu pour ne jamais en avoir besoin :
+
+- **Le schéma de base de données s'initialise automatiquement** à chaque
+  démarrage du serveur (`initSchema()` appelé en tête de `server.js`,
+  idempotent — sans risque de le relancer).
+- **Le tout premier compte administrateur se crée par une requête web**,
+  pas par une commande : définis `SETUP_TOKEN` dans les variables
+  d'environnement du service (une valeur aléatoire longue, gardée secrète),
+  puis :
+
+  ```bash
+  curl -X POST https://ton-service.onrender.com/api/v1/setup/create-admin \
+    -H "Content-Type: application/json" \
+    -H "x-setup-token: <la valeur de SETUP_TOKEN>" \
+    -d '{"email":"toi@exemple.com","password":"un-mot-de-passe-solide"}'
+  ```
+
+  Sans le bon jeton, cette route refuse systématiquement (testé).
+
+### Limite importante du palier gratuit à connaître
+
+Sur le palier gratuit de Render, le disque du service est **éphémère** : il
+est remis à zéro non seulement à chaque redéploiement, mais aussi **à chaque
+réveil du service après 15 minutes d'inactivité**. Concrètement, la base
+SQLite (comptes, abonnements, coupons) peut disparaître plusieurs fois par
+jour tant que le service reste sur ce palier — ce n'est pas un incident, c'est
+le comportement normal de l'offre gratuite. C'est sans conséquence tant qu'il
+s'agit de tests, puisqu'aucune donnée réelle d'abonné n'existe encore (aucune
+passerelle de paiement n'est branchée). Avant de compter sur des comptes qui
+persistent réellement dans le temps, deux options : passer au palier payant
+Render avec un disque persistant, ou migrer vers une base Postgres managée
+(gratuite chez Render mais qui expire après 30 jours, ou un fournisseur tiers)
+— le schéma de `db/schema.sql` se transpose directement, seul le client
+`better-sqlite3` serait à remplacer par un client Postgres (`pg`).
+
 ## Ce qui est réel et testé aujourd'hui
 
 - Inscription, connexion, mots de passe hachés (bcrypt), jetons JWT à durée de
