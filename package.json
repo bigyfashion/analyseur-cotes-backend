@@ -1,0 +1,24 @@
+{
+  "name": "analyseur-cotes-de-paris-backend",
+  "version": "26.1.0",
+  "private": true,
+  "description": "Backend V26 (comptes, abonnements, paiement) de l'Analyseur de cotes de paris. Les passerelles de paiement sont stubbees tant que les cles marchandes reelles ne sont pas fournies.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node db/init.js",
+    "smoke-test": "node scripts/smoke-test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "better-sqlite3": "^11.3.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.4.0",
+    "dotenv": "^16.4.5",
+    "express-validator": "^7.2.0"
+  }
+}
